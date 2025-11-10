@@ -3,6 +3,7 @@ import http from "http";
 import fs from "fs";
 import express from "express";
 import multer from "multer";
+import path from "path";
 
 const program = new Command();
 
@@ -28,8 +29,28 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+const INVENTORY_FILE = path.join(options.cache, "inventory.json");
 let inventory = [];
 let nextId = 1;
+
+if (fs.existsSync(INVENTORY_FILE)) {
+  try {
+    const data = fs.readFileSync(INVENTORY_FILE, "utf8");
+    inventory = JSON.parse(data);
+    nextId = Math.max(...inventory.map((i) => i.id), 0) + 1;
+    console.log(`Loaded ${inventory.length} items from inventory file`);
+  } catch (error) {
+    console.error("Error loading inventory file:", error.message);
+  }
+}
+
+function saveInventory() {
+  try {
+    fs.writeFileSync(INVENTORY_FILE, JSON.stringify(inventory, null, 2));
+  } catch (error) {
+    console.error("Error saving inventory:", error.message);
+  }
+}
 
 app.post("/register", upload.single("photo"), (req, res) => {
   const { inventory_name, description } = req.body;
@@ -45,6 +66,7 @@ app.post("/register", upload.single("photo"), (req, res) => {
   };
 
   inventory.push(item);
+  saveInventory();
   res.status(201).json({ message: "Item created", item });
 });
 
