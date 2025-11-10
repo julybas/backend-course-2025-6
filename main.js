@@ -92,6 +92,48 @@ app.get("/inventory/:id", (req, res) => {
   });
 });
 
+app.put("/inventory/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const item = inventory.find((i) => i.id === id);
+  if (!item) return res.status(404).json({ error: "Not found" });
+
+  if (req.body.name) item.name = req.body.name;
+  if (req.body.description) item.description = req.body.description;
+  saveInventory();
+  res.json({ message: "Item updated", item });
+});
+
+app.get("/inventory/:id/photo", (req, res) => {
+  const id = Number(req.params.id);
+  const item = inventory.find((i) => i.id === id);
+  if (!item || !item.photo) return res.status(404).json({ error: "No photo" });
+  res.sendFile(path.resolve(options.cache, item.photo));
+});
+
+app.put("/inventory/:id/photo", upload.single("photo"), (req, res) => {
+  const id = Number(req.params.id);
+  const item = inventory.find((i) => i.id === id);
+  if (!item) return res.status(404).json({ error: "Not found" });
+
+  item.photo = req.file.filename;
+  saveInventory();
+  res.json({ message: "Photo updated", item });
+});
+
+app.delete("/inventory/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const index = inventory.findIndex((i) => i.id === id);
+  if (index === -1) return res.status(404).json({ error: "Not found" });
+
+  inventory.splice(index, 1);
+  saveInventory();
+  res.json({ message: "Item deleted" });
+});
+
+app.use((req, res) => {
+  res.status(405).send("Method Not Allowed");
+});
+
 const server = http.createServer(app);
 server.listen(options.port, options.host, () => {
   console.log(`Server running at http://${options.host}:${options.port}`);
