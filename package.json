@@ -2,6 +2,7 @@
   "name": "lab6",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,6 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "commander": "^14.0.2",
+    "express": "^5.1.0",
+    "multer": "^2.0.2",
     "superagent": "^10.2.3"
   },
   "devDependencies": {
