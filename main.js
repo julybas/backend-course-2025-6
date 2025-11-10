@@ -70,6 +70,28 @@ app.post("/register", upload.single("photo"), (req, res) => {
   res.status(201).json({ message: "Item created", item });
 });
 
+app.get("/inventory", (req, res) => {
+  res.json(
+    inventory.map((i) => ({
+      id: i.id,
+      name: i.name,
+      description: i.description,
+      photo_url: i.photo ? `/inventory/${i.id}/photo` : null,
+    }))
+  );
+});
+
+app.get("/inventory/:id", (req, res) => {
+  const item = inventory.find((i) => i.id == req.params.id);
+  if (!item) return res.status(404).json({ error: "Not found" });
+  res.json({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    photo_url: item.photo ? `/inventory/${item.id}/photo` : null,
+  });
+});
+
 const server = http.createServer(app);
 server.listen(options.port, options.host, () => {
   console.log(`Server running at http://${options.host}:${options.port}`);
