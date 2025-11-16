@@ -23,6 +23,8 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(express.static(path.join(process.cwd(), "public")));
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, options.cache),
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
@@ -128,6 +130,50 @@ app.delete("/inventory/:id", (req, res) => {
   inventory.splice(index, 1);
   saveInventory();
   res.json({ message: "Item deleted" });
+});
+
+app.get("public/RegisterForm.html", (req, res) => {
+  const formPath = path.join(process.cwd(), "RegisterForm.html");
+  if (fs.existsSync(formPath)) {
+    res.sendFile(formPath);
+  } else {
+    res.status(404).send("RegisterForm.html not found");
+  }
+});
+
+app.get("public/SearchForm.html", (req, res) => {
+  const formPath = path.join(process.cwd(), "SearchForm.html");
+  if (fs.existsSync(formPath)) {
+    res.sendFile(formPath);
+  } else {
+    res.status(404).send("SearchForm.html not found");
+  }
+});
+
+app.get("/search", (req, res) => {
+  const { id, includePhoto } = req.query;
+  const itemId = Number(id);
+
+  if (isNaN(itemId)) {
+    return res.status(400).json({ error: "Invalid ID format" });
+  }
+
+  const item = inventory.find((i) => i.id === itemId);
+  if (!item) {
+    return res.status(404).json({ error: "Not Found" });
+  }
+
+  const responseItem = {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+  };
+
+  if (includePhoto && item.photo) {
+    responseItem.photo_url = `/inventory/${item.id}/photo`;
+  }
+
+  res.json(responseItem);
 });
 
 app.use((req, res) => {
