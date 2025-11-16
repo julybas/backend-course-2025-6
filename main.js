@@ -109,6 +109,7 @@ app.get("/inventory/:id/photo", (req, res) => {
   const id = Number(req.params.id);
   const item = inventory.find((i) => i.id === id);
   if (!item || !item.photo) return res.status(404).json({ error: "No photo" });
+  res.set("Content-Type", "image/jpeg");
   res.sendFile(path.resolve(options.cache, item.photo));
 });
 
@@ -132,7 +133,7 @@ app.delete("/inventory/:id", (req, res) => {
   res.json({ message: "Item deleted" });
 });
 
-app.get("public/RegisterForm.html", (req, res) => {
+app.get("/RegisterForm.html", (req, res) => {
   const formPath = path.join(process.cwd(), "RegisterForm.html");
   if (fs.existsSync(formPath)) {
     res.sendFile(formPath);
@@ -141,7 +142,7 @@ app.get("public/RegisterForm.html", (req, res) => {
   }
 });
 
-app.get("public/SearchForm.html", (req, res) => {
+app.get("=/SearchForm.html", (req, res) => {
   const formPath = path.join(process.cwd(), "SearchForm.html");
   if (fs.existsSync(formPath)) {
     res.sendFile(formPath);
