@@ -281,6 +281,9 @@ app.put("/inventory/:id/photo", upload.single("photo"), (req, res) => {
   const id = Number(req.params.id);
   const item = inventory.find((i) => i.id === id);
   if (!item) return res.status(404).json({ error: "Not found" });
+  if (!req.file) {
+    return res.status(400).json({ error: "Photo file is required" });
+  }
 
   item.photo = req.file.filename;
   saveInventory();
